@@ -1,0 +1,10 @@
+ { 
+when ( 1_1 + 1_1 == 8_2 ) { 
+num mynumber mynumber = 2_5 
+  } 
+elsewhen { 
+when ( 2_4 != 1_5 ) {
+num hellos hellos = 2_1 E 2_10 
+    } mynumber = 4_2 * 1_2 + ( 2_1 ) 
+  } 
+} 
