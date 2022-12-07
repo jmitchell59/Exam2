@@ -1,298 +1,382 @@
-import java.io.File;
-import java.io.*;
+import java.util.HashMap;
+import java.util.List;
 
-public class synAnalyzer extends lexAnalyzer {
-
-    public static void main(String[] args) {
-        try {
-            in_fp = new File("test4.in");
-            reader = new FileReader(in_fp);
-            program();
-            reader.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
-
-    static void program() {
-        System.out.println("Enter <program>");
-        // Uses the first character
-        getChar();
-        // Reading the next character
-        lex();
-        if (nextToken == BEGIN) {
-            lex();
-            stmtlist();
-        } else {
-            error();
-        }
-        // uses lex();
-        if (nextToken == NEW_LINE) {
-            lex();
-        }
-        if (nextToken == END) {
-            System.out.println("Program Had Successfully Ended");
-        } else {
-            error();
-        }
-        System.out.println("Exit <program>");
-    }
-
-    // statement list
-    static void stmtlist() {
-        System.out.println("Enter <stmtlist>");
-        stmt();
-        if (nextToken == SEMI_COLON) {
-            lex();
-            stmtlist();
-        }
-        System.out.println("Exit <stmtlist>");
-    }
-
-    // Enter statement
-    static void stmt() {
-        System.out.println("Enter <stmt>");
-        switch (nextToken) {
-            case NEW_LINE:
-                lex();
-                stmt();
-                break;
-            case IF_KEY:
-                if_stmt();
-                break;
-            case WHILE_KEY:
-                while_l();
-                break;
-            case INT_TYPE:
-                declr();
-                break;
-            case FOR_KEY:
-                for_l();
-                break;
-            default:
-                error();
-                break;
-        }
-        System.out.println("Exit <stmt>");
-    }
-
-    // if statement
-    static void if_stmt() {
-        System.out.println("Enter <if_stmt>");
-        if (nextToken != IF_KEY) {
-            error();
-        } else {
-            lex();
-            if (nextToken != PARENTHESIS_LEFT) {
-                error();
-            } else {
-                lex();
-                bool_expr();
-                if (nextToken != PARENTHESIS_RIGHT) {
-                    error();
-                } else {
-                    lex();
-                    stmt();
-                }
-            }
-        }
-        System.out.println("Exit <if_stmt>");
-    }
-
-    // while loop
-    static void while_l() {
-        System.out.println("Enter <while_l>");
-        if (nextToken != WHILE_KEY) {
-            error();
-        } else {
-            lex();
-            if (nextToken != PARENTHESIS_LEFT) {
-                error();
-            } else {
-                lex();
-                bool_expr();
-                if (nextToken != PARENTHESIS_RIGHT) {
-                    error();
-                } else {
-                    lex();
-                    stmt();
-                }
-            }
-        }
-        System.out.println("Exit <while_l>");
-    }
-
-    // for loop
-    static void for_l() {
-        System.out.println("Enter <for_l>");
-        if (nextToken != FOR_KEY) {
-            error();
-        } else {
-            lex();
-            if (nextToken != PARENTHESIS_LEFT) {
-                error();
-            } else {
-                lex();
-                if (nextToken != INT_TYPE) {
-                    error();
-                } else {
-                    lex();
-                    if (nextToken != IDEN) {
-                        error();
-                    } else {
-                        lex();
-                        if (nextToken != UNTIL) {
-                            error();
-                        } else {
-                            lex();
-                            if (nextToken != INT_LIT) {
-                                error();
-                            } else {
-                                lex();
-                                if (nextToken != PARENTHESIS_RIGHT) {
-                                    error();
-                                } else {
-                                    lex();
-                                    stmt();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        System.out.println("Exit <for_l>");
-    }
-
-    // Enter a declaration
-    static void declr() {
-        System.out.println("Enter <declr>");
-        if (nextToken != INT_TYPE) {
-            error();
-        } else {
-            lex();
-            if (nextToken != IDEN) {
-                error();
-            } else {
-                lex();
-                if (nextToken == ASSIGNMENT_OP) {
-                    lex();
-                    expr();
-                }
-            }
-        }
-        System.out.println("Exit <declr>");
-    }
-
-    // Enter an expression
-    static void expr() {
-        System.out.println("Enter <expr>");
-        term();
-        while (nextToken == MULTIPLY_OP || nextToken == ADDING_OP) {
-            lex();
-            term();
-        }
-        System.out.println("Exit <expr>");
-    }
-
-    // Enter a term
-    static void term() {
-        System.out.println("Enter <term>");
-        factor();
-        while (nextToken == DIVIDE_OP || nextToken == SUBTRACT_OP || nextToken == MODULE_OP) {
-            lex();
-            factor();
-        }
-        System.out.println("Exit <term>");
-    }
-
-    // Enter a factor
-    static void factor() {
-        System.out.println("Enter <factor>");
-        if (nextToken == IDEN || nextToken == INT_LIT) {
-            lex();
-        } else {
-            if (nextToken == PARENTHESIS_LEFT) {
-                lex();
-                expr();
-                if (nextToken == PARENTHESIS_RIGHT)
-                    lex();
-                else
-                    error();
-            } else {
-                error();
-            }
-        }
-        System.out.println("Exit <factor>");
-    }
-
-    // Boolean Expression
-    static void bool_expr() {
-        System.out.println("Enter <bool_expr>");
-        brel();
-        while (nextToken == NOT_EQUAL || nextToken == EQUAL) {
-            lex();
-            brel();
-        }
-        System.out.println("Exit <bool_expr>");
-    }
-
-    // <brel> expression
-    static void brel() {
-        System.out.println("Enter <brel>");
-        bexpr();
-        while (nextToken == GREATER_EQUAL || nextToken == LESS_EQUAL || nextToken == LESS_THAN
-                || nextToken == GREATER_THAN) {
-            lex();
-            bexpr();
-        }
-        System.out.println("Exit <brel>");
-    }
-
-    // <bexpr>
-    static void bexpr() {
-        System.out.println("Enter <bexpr>");
-        bterm();
-        while (nextToken == MULTIPLY_OP || nextToken == ADDING_OP) {
-            lex();
-            bterm();
-        }
-        System.out.println("Exit <bexpr>");
-    }
-
-    // <bterm>
-    static void bterm() {
-        System.out.println("Enter <bterm>");
-        bfactor();
-        while (nextToken == DIVIDE_OP || nextToken == SUBTRACT_OP || nextToken == MODULE_OP) {
-            lex();
-            bfactor();
-        }
-        System.out.println("Exit <bterm>");
-    }
-
-    // <bfactor>
-    static void bfactor() {
-        System.out.println("Enter <bfactor>");
-        if (nextToken == IDEN || nextToken == INT_LIT) {
-            lex();
-        } else {
-            if (nextToken == PARENTHESIS_LEFT) {
-                lex();
-                bool_expr();
-                if (nextToken == PARENTHESIS_RIGHT)
-                    lex();
-                else
-                    error();
-            } else {
-                error();
-            }
-        }
-        System.out.println("Exit <bfactor>");
-    }
-
-    static void error() {
-        System.out.println("Syntax Error Detected");
-    }
-
+public class RDA {
+	private int currentToken;
+	private HashMap tokenValues;
+	private List<Integer> tokens;
+	private List<String> lexemes;
+	public RDA(List<String> lexemes, List<Integer> tokens) {
+		this.tokens = tokens;
+		this.lexemes = lexemes;
+		this.tokenValues = Main.tokenValues;
+		this.currentToken = 0;
+	}
+	public void nextToken() {
+		/*
+		 * Proceeds to the next token
+		 */
+		this.currentToken += 1;
+		System.out.println("Next token: " + getCurrentTokenName() + " (" + getCurrentToken() + ")");
+	}
+	public Integer getCurrentToken() {
+		/*
+		 * Gets current token code
+		 */
+		return this.tokens.get(currentToken);
+	}
+	public String getCurrentTokenName() {
+		/*
+		 * Gets current token name
+		 */
+		return this.lexemes.get(currentToken);
+	}
+	public void program() {
+		/*
+		 * <Program> --> BEGIN { <stmt_list> } END 
+		 */
+		System.out.println("Entering <Program>");
+		if(tokenValues.get("BEGIN").equals(getCurrentToken())) {
+			nextToken();
+			if(tokenValues.get("{").equals(getCurrentToken())) {
+				nextToken();
+				stmt_list();
+			}
+			else {
+				System.out.println("Error: No { provided to organize statement list");
+				System.exit(1);
+			}
+			if(tokenValues.get("}").equals(this.tokens.get(currentToken))) {
+				nextToken();
+				//Handle program's end
+				if(tokenValues.get("END").equals(this.tokens.get(currentToken))) {
+					System.out.println("Program analysis has been completed and found no syntax errors.");
+				}
+				else {
+					System.out.println("Error: Program ends with invalid end token");
+					System.exit(1);
+				}	
+			}
+			else {
+				System.out.println("Error: No } provided to organize statement list");
+				System.exit(1);
+			}
+		}
+		else {
+			System.out.print("Error: Program begins with invalid start token.");
+			System.exit(1);
+		}
+		
+	}
+	public void stmt() {
+		/*
+		 * <stmt> --> <when_stmt> | <declr_stmt> | <initialize_stmt> | <loop_stmt>
+		 */
+		System.out.println("Entering <stmt>");
+		Integer token = getCurrentToken();
+		if(tokenValues.get("when") == token) {
+			nextToken();
+			when();
+		}
+		else if(tokenValues.get("loop") == token) {
+			nextToken();
+			loop();
+		}
+		else if(tokenValues.get("num") == token) {
+			nextToken();
+			declr();
+		}
+		else {
+			nextToken();
+			init();
+		}
+	}
+	public void stmt_list() {
+		/*
+		 * <stmt_list> --> <stmt> <stmt_list*>
+		 * <stmt_list*> --> EMPTY | <stmt> <stmt_list*>
+		 */
+		System.out.println("Entering <stmt_list>");
+		if(getCurrentToken() == tokenValues.get("when") || getCurrentToken() == tokenValues.get("num") || getCurrentToken() == tokenValues.get("loop") || getCurrentToken() == tokenValues.get("id")) {
+			stmt();
+			while(getCurrentToken() == tokenValues.get("when") || getCurrentToken() == tokenValues.get("num") || getCurrentToken() == tokenValues.get("loop") || getCurrentToken() == tokenValues.get("id")) {
+				stmt();
+			}
+		}
+	}
+	public void when() {
+		/*
+		 * <if_stmt> --> when ( <bexpr> ) { <stmt_list)> } | when ( <bexpr> ) { <stmt_list> } elsewhen { <stmt_list> }
+		 */
+		System.out.println("Entering <if_stmt>");
+		if(tokenValues.get("(") == getCurrentToken()) {
+			nextToken();
+			bexpr();
+			if(tokenValues.get(")") == getCurrentToken()) {
+				nextToken();
+				if(tokenValues.get("{") == getCurrentToken()) {
+					nextToken();
+					stmt_list();
+					if(tokenValues.get("}") == getCurrentToken()) {
+						nextToken();
+						if(tokenValues.get("elsewhen") == getCurrentToken()) {
+							nextToken();
+							if(tokenValues.get("{") == getCurrentToken()) {
+								nextToken();
+								stmt_list();
+								if(tokenValues.get("}") == getCurrentToken()) {
+									nextToken();
+								}
+								else {
+									System.out.println("Error: Missing } character in elsewhen statement");
+									System.exit(1);
+								}
+							}
+							else {
+								System.out.println("Error: Missing { character in elsewhen statement");
+								System.exit(1);
+							}
+							stmt_list();
+						}
+					}
+					else {
+						System.out.println("Error: Missing } character in when statement");
+						System.exit(1);
+					}
+				}
+				else {
+					System.out.println("Error: Missing { character in when statement");
+					System.exit(1);
+				}
+			}
+			else {
+				System.out.println("Error: Missing ) character in when statement");
+				System.exit(1);
+			}
+		}
+		else {
+			System.out.println("Error: Missing ( character in when statement");
+			System.exit(1);
+		}
+	}
+	public void loop() {
+		/*
+		 * <loop_stmt> --> loop ( <expr> ) { <stmt_list> }
+		 */
+		System.out.println("Entering <loop_stmt>");
+		if(tokenValues.get("(") == getCurrentToken()) {
+			nextToken();
+			bexpr();
+			if(tokenValues.get(")") == getCurrentToken()) {
+				nextToken();
+				if(tokenValues.get("{") == getCurrentToken()) {
+					nextToken();
+					stmt_list();
+					if(tokenValues.get("}") == getCurrentToken()) {
+						nextToken();
+					}
+					else {
+						System.out.println("Error: Missing } character in loop statement");
+						System.exit(1);
+					}
+				}
+				else {
+					System.out.println("Error: Missing { character in loop statement");
+					System.exit(1);
+				}
+			}
+			else {
+				System.out.println("Error: Missing ) character in loop statement");
+				System.exit(1);
+			}
+		}
+		else {
+			System.out.println("Error: Missing ( character in loop statement");
+			System.exit(1);
+		}
+	}
+	public void declr() {
+		/*
+		 * <declr> --> num id
+		 */
+		System.out.println("Entering <declr>");
+		if(tokenValues.get("id") == getCurrentToken()) {
+			nextToken();
+		}
+		else {
+			System.out.println("Error: Missing an identifier in declaration statement.");
+			System.exit(1);
+		}
+	}
+	public void init() {
+		/*
+		 * <assign> --> id = <expr>
+		 */
+		System.out.println("Entering <init>");
+		if(tokenValues.get("=") == getCurrentToken()) {
+			nextToken();
+			expr();
+		}
+		else {
+			System.out.println("Error: Missing an = character in initialization statement.");
+			System.exit(1);
+		}
+	}
+	public void expr() {
+		/*
+		 *<expr> -> <mul_op> <add_op*>
+		 * <expr*> -> EMPTY | + <mul_op> <add_op*> | <mul_op> 
+		 */
+		System.out.println("Entering <expr>");
+		mul();
+		while(tokenValues.get("+") == getCurrentToken()) {
+			nextToken();
+			mul();	
+		}
+	}
+	public void mul() {
+		/*
+		 * <mul_op> -> <sub_op> <mul_op*>
+		 * <mul_op*> -> EMPTY | * <sub_op> <mul_op*> | <sub_op>
+		 */
+		System.out.println("Entering <mul_op>");
+		sub();
+		while(tokenValues.get("*") == getCurrentToken()) {
+			nextToken();
+			sub();	
+		}
+	}
+	public void div() {
+		/*
+		 * <div_op> -> <mod_op> <div_op*>
+		 * <div_op*> -> EMPTY | / <mod_op> <div_op*> | <mod_op>
+		 */
+		System.out.println("Entering <div_op>");
+		mod();
+		while(tokenValues.get("/") == getCurrentToken()) {
+			nextToken();
+			mod();	
+		}
+	}
+	public void sub() {
+		/*
+		 * <sub_op> -> <div_op> <sub_op*>
+		 * <sub_op*> -> EMPTY | - <div_op> <sub_op*> | <div_op>
+		 */
+		System.out.println("Entering <sub_op>");
+		div();
+		while(tokenValues.get("-") == getCurrentToken()) {
+			nextToken();
+			div();
+		}
+	}
+	public void mod() {
+		/*
+		 * <mod_op> -> <exp_op> <mod_op*>
+		 * <mod_op*> -> EMPTY | % <exp_op> <mod_op> | <exp_op>
+		 */
+		System.out.println("Entering <mod_op>");
+		exp();
+		while(tokenValues.get("%") == getCurrentToken()) {
+			nextToken();
+			exp();
+		}
+	}
+	public void exp() {
+		/*
+		 * <exp_op> -> <term> <exp_op*>
+		 * <exp_op> -> EMPTY | E <term> <exp_op*> | <term>
+		 */
+		System.out.println("Entering <exp_op>");
+		term();
+		while(tokenValues.get("E") == getCurrentToken()) {
+			nextToken();
+			term();
+		}
+	}
+	public void term() {
+		/*
+		 * <term> -> id | integer | ( <expr> )
+		 */
+		System.out.println("Entering <term>");
+		if(tokenValues.get("int_one_byte") == getCurrentToken() || tokenValues.get("int_two_byte") == getCurrentToken() || tokenValues.get("int_four_byte") == getCurrentToken() || tokenValues.get("int_eight_byte") == getCurrentToken() || tokenValues.get("id") == getCurrentToken()) {
+			nextToken();
+		}
+		else if(tokenValues.get("(") == getCurrentToken()) {
+			nextToken();
+			expr();
+			if(tokenValues.get(")") == getCurrentToken()) {
+				nextToken();
+			}
+			else {
+				System.out.println("Error: Missing closing ) in expression");
+				System.exit(1);
+			}
+		}
+		else {
+			System.out.println("Error: Invalid token found in expression statement");
+			System.exit(1);
+		}
+	}
+	public void bexpr() {
+		/*
+		 * <bexpr> --> <bor> <bexpr*>
+		 * <bexpr*> --> EMPTY | & <bexpr*> | <bor>
+		 */
+		System.out.println("Entering <bexpr>");
+		bor();
+		while(tokenValues.get("&") == getCurrentToken()) {
+			nextToken();
+			bor();
+		}
+	}
+	public void bor() {
+		/*
+		 *<bor> --> <beq> <bor*>
+		 *<bor*> --> EMPTY | || <bor*> | <beq>
+		 */
+		System.out.println("Entering <bor>");
+		beq();
+		while(tokenValues.get("|") == getCurrentToken()) {
+			nextToken();
+			beq();
+		}
+	}
+	public void beq() {
+		/*
+		 * <beq> --> <bcomp> <beq*>
+		 * <beq*> --> EMPTY | == <beq*> | != <beq*> | <bcomp>
+		 */
+		System.out.println("Entering <beq>");
+		bcomp();
+		while(tokenValues.get("==") == getCurrentToken() || tokenValues.get("!=") == getCurrentToken()) {
+			nextToken();
+			bcomp();
+		}
+	}
+	public void bcomp() {
+		/*
+		 * <bcomp> --> <bexpr> <bcomp*>
+		 * <bcomp*> --> EMPTY | > <bcomp*> | < <bcomp*> | >= <bcomp*> | <= <bcomp*> | <bexpr>
+		 */
+		System.out.println("Entering <bcomp>");
+		bnot();
+		while(tokenValues.get(">") == getCurrentToken() || tokenValues.get("<") == getCurrentToken() || tokenValues.get(">=") == getCurrentToken() || tokenValues.get("<=") == getCurrentToken()) {
+			nextToken();
+			bnot();
+		}
+	}
+	public void bnot() {
+		/*
+		 *  <bnot> --> !<expr> | <expr>
+		 */
+		System.out.println("Entering <bnot>");
+		if(tokenValues.get("!") == getCurrentToken()) {
+			nextToken();
+			expr();
+		}
+		else {
+			expr();
+		}
+	}
 }
