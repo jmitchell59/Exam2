@@ -124,3 +124,17 @@ term -> ( expr ) <br />
 
 # d.) Ambiguity <br />
 These Grammar rules will have an unambiguous grammar. <br />
+
+# g.) Lexical and Syntax Errors <br />
+## Lexical Errors in Lexicalerror.txt: <br />
+1.) There is no token BEGUN in this language
+2.) There should be an identifier, but the size is under six, the minimum length for an identifier. <br />
+3.) The lexeme 2, of which the identifier tester is being initialized as, creates a lexical error because the integer size (1_, 2_, 4_, or 8_) is not present. <br />
+4.) The lexeme {num creates a lexical error because an identifier must only be letters. <br />
+5.) The lexeme lop creates a lexical error because there is no keyword called lop in this language. <br />
+## Syntax Errors in SyntaxError.txt: <br />
+1.) The left bracket following BEGIN is missing. <br />
+2.) The left parenthesis following the first when statement is missing. <br />
+3.) The left bracket in the when statement is missing creating a syntax error. <br />
+4.) The closing right parenthesis of the loop statement is missing creating a syntax error. <br />
+5.) The closing right bracket preceding where END is supposed to be is missing creating a syntax error. <br />
