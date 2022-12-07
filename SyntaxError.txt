@@ -1,0 +1,5 @@
+BEGIN when 2_2 + 4_10 != 4_40 ) 
+num freebird freebird = 8_100 loop (
+1_1 == 1_1  {
+freebird = 4_21 * 4_1 
+} END
