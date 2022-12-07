@@ -1,353 +1,181 @@
-import java.io.File;
-import java.io.*;
-public class lexAnalyzer {
-  static int charClass;
-    // Lexemes and Characters
-    static char lexeme[] = new char[100];
-    static char nextChar;
-    static int lexLen;
-    static int token;
-    static int nextToken;
-    static File in_fp;
-    static Reader reader;
-    static int data;
-    static String string;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-    /* Character classes */
-    final static int LETTER = 0;
-    final static int DIGIT = 1;
-    final static int UNDERSCORE = 2;
-    final static int NEW_LINE = 3;
-    final static int SEMI_COLON = 4;
-    final static int UNKNOWN = 99;
-    final static int BEGIN = 100;
-    final static int END = 101;
-    final static int INVALID = 444;
-
-    // Int literals and types
-    final static int INT_LITERAL = 10;
-    final static int INT_TYPE_BYTE = 11;
-    final static int INT_TYPE_WORD = 12;
-    final static int INT_TYPE_DWORD = 13;
-    final static int INT_TYPE_QWORD = 14;
-    final static int INT_TYPE = 15;
-    final static int IDEN = 19;
-
-    // Operators
-    final static int ASSIGNMENT_OP = 20;
-    final static int ADDING_OP = 21;
-    final static int SUBTRACT_OP = 22;
-    final static int DIVIDE_OP = 23;
-    final static int MULTIPLY_OP = 24;
-    final static int MODULE_OP = 25;
-    final static int PARENTHESIS_LEFT = 26;
-    final static int PARENTHESIS_RIGHT = 27;
-
-    // Comparing
-    final static int EQUAL = 30;
-    final static int NOT_EQUAL = 31;
-    final static int LESS_THAN = 32;
-    final static int GREATER_THAN = 33;
-    final static int LESS_EQUAL = 34;
-    final static int GREATER_EQUAL = 35;
-    final static int UNTIL = 36;
-
-    // If, for, and while
-    final static int IF_KEY = 40;
-    final static int FOR_KEY = 41;
-    final static int WHILE_KEY = 42;
-
-    static String keywords[] = new String[] { "Barry", "Woodhouse", "Duchess", "Quick", "Identify", "Fabian", "Wade" };
-
-    public static void main(String[] args) {
-        try {
-            in_fp = new File("test1.in");
-            reader = new FileReader(in_fp);
-            getChar();
-            do {
-                lex();
-            } while (nextToken != END);
-            reader.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
-
-    // for resetting the char array
-    static void clearArr(char[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = '\0';
-        }
-    }
-
-    // add character to the char array lexeme
-    static void addChar() {
-        if (lexLen <= 98) {
-            lexeme[lexLen++] = nextChar;
-        } else {
-            System.out.print("Error - lexeme is too long \n");
-        }
-    }
-
-    // read the next character in the file
-    static void getChar() {
-        try {
-            data = reader.read();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        if (data != -1) {
-            nextChar = (char) data;
-            // checking for the character's class
-            if (Character.isDigit(nextChar)) {
-                charClass = DIGIT;
-            } else if (Character.isLetter(nextChar)) {
-                charClass = LETTER;
-            } else if (nextChar == '_') {
-                charClass = UNDERSCORE;
-            } else if (nextChar == '\n') {
-                charClass = NEW_LINE;
-            } else if (nextChar == ';') {
-                charClass = SEMI_COLON;
-            } else {
-                charClass = UNKNOWN;
-            }
-        } else {
-            charClass = END;
-        }
-    }
-
-    static int lookup(char ch) {
-        switch (ch) {
-            case '(':
-                addChar();
-                nextToken = PARENTHESIS_LEFT;
-                break;
-            case ')':
-                addChar();
-                nextToken = PARENTHESIS_RIGHT;
-                break;
-            case '+':
-                addChar();
-                nextToken = ADDING_OP;
-                break;
-            case '-':
-                addChar();
-                nextToken = SUBTRACT_OP;
-                break;
-            case '*':
-                addChar();
-                nextToken = MULTIPLY_OP;
-                break;
-            case '/':
-                addChar();
-                nextToken = DIVIDE_OP;
-                break;
-            case '%':
-                addChar();
-                nextToken = MODULE_OP;
-                break;
-            case '=':
-                // add the current character into lexeme string first
-                addChar();
-                // get the next character
-                getChar();
-                if (nextChar == '=') {
-                    // add character input to lexeme
-                    addChar();
-                    nextToken = EQUAL;
-                } else if (Character.isSpaceChar(nextChar)) {
-                    // A space character makes it a simple case
-                    nextToken = ASSIGNMENT_OP;
-                } else {
-                    addChar();
-                    nextToken = INVALID;
-                }
-                break;
-            case '>':
-                // add the current character into lexeme string first
-                addChar();
-                // adds the next character
-                getChar();
-                if (nextChar == '=') {
-                    // adds a character input to a lexeme
-                    addChar();
-                    nextToken = GREATER_EQUAL;
-                } else if (Character.isSpaceChar(nextChar)) {
-                    // if next char is a space then it is a simple case
-                    nextToken = GREATER_THAN;
-                } else if (nextChar == '>') {
-                    addChar();
-                    nextToken = UNTIL;
-                } else {
-                    addChar();
-                    nextToken = INVALID;
-                }
-                break;
-            case '<':
-                // add the current character into lexeme string first
-                addChar();
-                // get the next character
-                getChar();
-                if (nextChar == '=') {
-                    // add the valid char input to lexeme
-                    addChar();
-                    nextToken = LESS_EQUAL;
-                } else if (Character.isSpaceChar(nextChar)) {
-                    // if next char is a space then it is a simple case
-                    nextToken = LESS_THAN;
-                } else {
-                    addChar();
-                    nextToken = INVALID;
-                }
-                break;
-            case '!':
-                // add a  character to lexeme string
-                addChar();
-                // get the next character
-                getChar();
-                if (nextChar == '=') {
-                    // add input to lexeme
-                    addChar();
-                    nextToken = NOT_EQUAL;
-                } else if (nextChar == 'b') {
-                    // add input to lexeme
-                    addChar();
-                    nextToken = BEGIN;
-                } else if (nextChar == 'e') {
-                    // add input to lexeme
-                    addChar();
-                    nextToken = END;
-                } else {
-                    addChar();
-                    nextToken = INVALID;
-                }
-                break;
-            case '$':
-                // add the current character into lexeme string first
-                addChar();
-                // get the next character
-                getChar();
-                if (nextChar == 'i') {
-                    // add the valid char input to lexeme
-                    addChar();
-                    nextToken = IF_KEY;
-                } else if (nextChar == 'f') {
-                    addChar();
-                    nextToken = FOR_KEY;
-                } else if (nextChar == 'w') {
-                    addChar();
-                    nextToken = WHILE_KEY;
-                } else {
-                    addChar();
-                    nextToken = INVALID;
-                }
-                break;
-            case '#':
-                // add the current character into lexeme string first
-                addChar();
-                // get the next character
-                getChar();
-                if (nextChar == 'b') {
-                    // add the valid char input to lexeme
-                    addChar();
-                    nextToken = INT_TYPE;
-                } else if (nextChar == 'w') {
-                    addChar();
-                    nextToken = INT_TYPE;
-                } else if (nextChar == 'd') {
-                    addChar();
-                    nextToken = INT_TYPE;
-                } else if (nextChar == 'q') {
-                    addChar();
-                    nextToken = INT_TYPE;
-                } else {
-                    addChar();
-                    nextToken = INVALID;
-                }
-                break;
-            default:
-                addChar();
-                nextToken = INVALID;
-                break;
-        }
-        return nextToken;
-    }
-
-    static void getNonBlank() {
-        while (Character.isSpaceChar(nextChar)) {
-            getChar();
-        }
-    }
-
-    static int lex() {
-        lexLen = 0;
-        clearArr(lexeme);
-        getNonBlank();
-        int idLen = 0;
-        switch (charClass) {
-            // identifier
-            case LETTER:
-                addChar();
-                idLen += 1;
-                getChar();
-                while (charClass == LETTER || charClass == UNDERSCORE) {
-                    addChar();
-                    idLen += 1;
-                    getChar();
-                }
-                if ((idLen >= 6) && (idLen <= 8)) {
-                    nextToken = IDEN;
-                } else {
-                    nextToken = INVALID;
-                }
-                break;
-            case UNDERSCORE:
-                addChar();
-                getChar();
-                while (charClass == LETTER || charClass == UNDERSCORE) {
-                    addChar();
-                    getChar();
-                }
-                nextToken = IDEN;
-                break;
-            // Integer literals
-            case DIGIT:
-                addChar();
-                getChar();
-                while (charClass == DIGIT) {
-                    addChar();
-                    getChar();
-                }
-                nextToken = INT_LITERAL;
-                break;
-            case NEW_LINE:
-                nextToken = NEW_LINE;
-                addChar();
-                getChar();
-                break;
-            case SEMI_COLON:
-                nextToken = SEMI_COLON;
-                addChar();
-                getChar();
-                break;
-            
-            case UNKNOWN:
-                lookup(nextChar);
-                getChar();
-                break;
-            
-            case END:
-                nextToken = END;
-                lexeme[0] = 'E';
-                lexeme[1] = 'N';
-                lexeme[2] = 'D';
-                lexeme[3] = '\0';
-                break;
-        } /* End of switch */
-        string = new String(lexeme);
-        System.out.println("Next token is: " + nextToken + ", Next lexeme is: " + string);
-        return nextToken;
-    }
+public class Main {
+	public static HashMap<String, Integer> tokenValues = new HashMap<>();
+	
+	public static void main(String[] args) {
+		//Load our token values
+		loadTokenValues();
+		//Get Code File
+		Path path = Path.of("test.txt");
+		//Path path = Path.of("test2.txt");
+		//Path path = Path.of("lexerr.txt");
+		//Path path = Path.of("synerr.txt");
+		
+		//Convert into Lists containing number codes and another the valid lexemes
+		List<String> lexemes = getLexemes(path);
+		List<Integer> tokens = Lexer.parseTokens(lexemes);
+		
+		//Check lists for valid syntax
+		RDA syn = new RDA(lexemes, tokens);
+		syn.program();
+	}
+	
+	public static void loadTokenValues() {
+		//Loads all the lexemes into a hashmap
+		tokenValues.put("BEGIN", 0);
+		tokenValues.put("END", 1);
+		tokenValues.put("when", 2);
+		tokenValues.put("elsewhen", 22);
+		tokenValues.put("loop", 3);
+		tokenValues.put("+", 4);
+		tokenValues.put("-", 5);
+		tokenValues.put("*", 6);
+		tokenValues.put("/", 7);
+		tokenValues.put("=", 8);
+		tokenValues.put(">", 9);
+		tokenValues.put("<", 10);
+		tokenValues.put(">=", 11);
+		tokenValues.put("<=", 12);
+		tokenValues.put("==", 13);
+		tokenValues.put("!=", 14);
+		tokenValues.put("!", 15);
+		tokenValues.put("num", 16);
+		tokenValues.put("{", 20);
+		tokenValues.put("}", 21);
+		tokenValues.put("(", 23);
+		tokenValues.put(")", 24);
+		tokenValues.put("int_one_byte", 25);
+		tokenValues.put("id", 26);
+		tokenValues.put("int_two_byte", 27);
+		tokenValues.put("int_four_byte", 28);
+		tokenValues.put("int_eight_byte", 29);
+		tokenValues.put("&", 30);
+		tokenValues.put("|", 31);
+		tokenValues.put("E", 32);
+		tokenValues.put("%", 32);
+		
+	}
+	public static List<String> getLexemes(Path pathToFile) {
+		/*
+		 * Reads each line and separates the lexemes by spaces, storing them in a list.
+		*/
+		List<String> lexemes = new ArrayList();
+		try {
+			List<String> lines = Files.readAllLines(pathToFile);
+			for(String line: lines) {
+				String[] lineSplit = line.split(" ");
+				for(String lexeme: lineSplit) {
+					if(lexeme != "") {
+						lexemes.add(lexeme);
+					}
+				}
+			}
+		} catch (IOException e) {
+			System.out.println(e);
+			System.out.println("Error: Unable to find file with path: " + pathToFile.toString());
+			System.exit(1);
+		}
+		return lexemes;
+	}
+	class Lexer {
+		public static List<Integer> parseTokens(List<String> lexemes) {
+			/*
+			 * Checks if the lexeme list contains valid tokens.
+			*/
+			assert lexemes.size() != 0;
+			List<Integer> tokens = new ArrayList<Integer>();
+			for(String lexeme: lexemes) {
+				//Check if the lexeme is in the HashMap
+				System.out.println("Validating lexeme: " + lexeme);
+				if(tokenValues.get(lexeme) != null) {
+					tokens.add(tokenValues.get(lexeme));
+				}
+				//Check if the lexeme is an integer literal or identifier
+				else {
+					if(Character.isDigit(lexeme.charAt(0))){
+						//Check if byte identifier is valid and if a value is provided
+						char posZero = lexeme.charAt(0);
+						if(lexeme.length() <= 2) {
+							System.out.println("Error: Unable to identify type of integer due to invalid structure being too short.");
+							System.exit(0);
+						}
+						if(lexeme.charAt(1) == '_' && lexeme.length() <= 2) {
+							System.out.println("Error: Unable to identify type of integer due to invalid structure not clarifying valid byte size.");
+							System.exit(0);
+						}
+						switch(posZero) {
+							//Check if number following type identifier is valid
+							case '1':
+								for(int i = 2; i < lexeme.length(); i++) {
+									if(!Character.isDigit(lexeme.charAt(i))) {
+										System.out.println("Error: Letter character was provided where an integer character was expected");
+										System.exit(1);
+									}
+								}
+								tokens.add(tokenValues.get("int_one_byte"));
+								break;
+							case '2':
+								for(int i = 2; i < lexeme.length(); i++) {
+									if(!Character.isDigit(lexeme.charAt(i))) {
+										System.out.println("Error: Letter character was provided where an integer character was expected");
+										System.exit(1);
+									}
+								}
+								tokens.add(tokenValues.get("int_two_byte"));
+								break;
+							case '4':
+								for(int i = 2; i < lexeme.length(); i++) {
+									if(!Character.isDigit(lexeme.charAt(i))) {
+										System.out.println("Error: Letter character was provided where an integer character was expected");
+										System.exit(1);
+									}
+								}
+								tokens.add(tokenValues.get("int_four_byte"));
+								break;
+							case '8':
+								for(int i = 2; i < lexeme.length(); i++) {
+									if(!Character.isDigit(lexeme.charAt(i))) {
+										System.out.println("Error: Letter character was provided where an integer character was expected");
+										System.exit(1);
+									}
+								}
+								tokens.add(tokenValues.get("int_eight_byte"));
+								break;
+							default:
+								System.out.println("Error: Invalid byte size provided for integer.");
+								System.exit(1);
+								break;
+						}
+					}
+					else if(Character.isLetter(lexeme.charAt(0)) || lexeme.charAt(0) == '_') {
+						//Check if identifier length is correct
+						if(lexeme.length() < 6 || lexeme.length() > 8) {
+							System.out.println("Error: Invalid length provided for identifier.");
+							System.exit(0);
+						}
+						//Check if all characters are letters
+						for(int i = 1; i < lexeme.length(); i++) {
+							if(!(Character.isLetter(lexeme.charAt(i)) || lexeme.charAt(i) == '_')) {
+								System.out.println("Error: A non-letter was provided where a numerical value was expected.");
+								System.exit(1);
+							}
+						}
+						tokens.add(tokenValues.get("id"));
+					}
+					else {
+						System.out.println("Error: Unable to identify token based on starting character.");
+						System.exit(1);
+					}
+				}
+			}
+			return tokens;
+		}
+	}
 }
