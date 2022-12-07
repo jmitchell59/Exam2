@@ -126,7 +126,7 @@ term -> ( expr ) <br />
 These Grammar rules will have an unambiguous grammar. <br />
 
 # g.) Lexical and Syntax Errors <br />
-## Lexical Errors in Lexicalerror.txt: <br />
+## Lexical Errors in LexicalError.txt: <br />
 1.) There is no token BEGUN in this language
 2.) There should be an identifier, but the size is under six, the minimum length for an identifier. <br />
 3.) The lexeme 2, of which the identifier tester is being initialized as, creates a lexical error because the integer size (1_, 2_, 4_, or 8_) is not present. <br />
