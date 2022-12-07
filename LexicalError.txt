@@ -1,0 +1,7 @@
+BEGUN {
+num test tester = 2 when ( 4_1 * 8_7 E 1_5 ) {
+num testing testing = 2_10 lop ( @ 1_4 + 1_8 == 2_32 ) {
+num bluefire bluefire = 4_16 
+    } 
+  } 
+} END
