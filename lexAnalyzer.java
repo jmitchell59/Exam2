@@ -23,7 +23,7 @@ public class Main {
 		List<Integer> tokens = Lexer.parseTokens(lexemes);
 		
 		//Check lists for valid syntax
-		RDA syn = new RDA(lexemes, tokens);
+		synAnalyzer syn = new synAnalyzer(lexemes, tokens);
 		syn.program();
 	}
 	
