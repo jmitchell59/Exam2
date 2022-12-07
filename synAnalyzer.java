@@ -1,12 +1,12 @@
 import java.util.HashMap;
 import java.util.List;
 
-public class RDA {
+public class synAnalyzer {
 	private int currentToken;
 	private HashMap tokenValues;
 	private List<Integer> tokens;
 	private List<String> lexemes;
-	public RDA(List<String> lexemes, List<Integer> tokens) {
+	public synAnalyzer(List<String> lexemes, List<Integer> tokens) {
 		this.tokens = tokens;
 		this.lexemes = lexemes;
 		this.tokenValues = Main.tokenValues;
